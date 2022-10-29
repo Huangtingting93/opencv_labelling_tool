@@ -56,4 +56,3 @@ def show(img,pts_list=[],msize=10,color=None, show=True,show_label=False):
         if show:
             plt.imshow(imgcp),plt.show()
         return imgcp
-     

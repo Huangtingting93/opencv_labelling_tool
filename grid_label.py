@@ -8,8 +8,8 @@ import string
 from util import show
 from pprint import pprint
 
-X_INIT_NUM = 10
-Y_INIT_NUM = 10
+X_INIT_NUM = 5
+Y_INIT_NUM = 5
 OPT_EXTEND = 'extend grid'
 OPT_MOVE = 'move grid'
 OPT_X_NUM = 'grid x num'
@@ -182,7 +182,6 @@ class Grid:
         if not self.lock_t: self.y_offset -= offset
         self.update_x_y_max()
 
-
 class Labeler:
     def __init__(self,orig_image) -> None:
         self.circle_r = 2
@@ -197,7 +196,6 @@ class Labeler:
         self._image_vis_corner = orig_image.copy() # layer 2 with 4 corner points 
         self._image_vis_collect = orig_image.copy() # layer 3 with 4 mesh and collected dots
 
-        # self._image_dots = orig_image.copy() # layer 0 original image
     @property
     def image_vis_dots(self):
         return self._image_vis_dots
@@ -222,8 +220,7 @@ class Labeler:
         print('drawing dots')
         self._source_dots = source_dots
         image_tmp = self.orig_image.copy()
-        self.image_vis_dots  = show(image_tmp,self._source_dots,msize=5,show=False,color=(0,255,255)) # layer 0 with dots
-
+        self.image_vis_dots  = show(image_tmp,self._source_dots,msize=8,show=False,color=(255,255,0)) # layer 0 with dots
 
     @property
     def corner_points(self):
@@ -233,12 +230,8 @@ class Labeler:
     def corner_points(self,corner_points):
         print('set corner')
         self._corner_points = np.asarray(corner_points).reshape(-1,2)
-        
-        # self._corner_points = np.sort(self._corner_points,axis=0)
-        # self._corner_points = np.sort(self._corner_points,axis=1)
         self._corner_points = self._corner_points.astype('float32')  # user defined
        
-        
         if self._corner_points.shape[0] == 4:
             min_idx = np.argsort(np.sum(self._corner_points,axis=1))[0]
             self._corner_points = np.vstack((self._corner_points[min_idx:],self._corner_points[:min_idx]))
@@ -254,13 +247,11 @@ class Labeler:
         if self._corner_points is not None:
             for k,pt in enumerate(self._corner_points):
                 x,y = int(pt[0]),int(pt[1])
-                cv2.circle(image_tmp, (x, y), 3, (255,0,255), -1)
-                cv2.circle(image_tmp, (x, y), 5, (0,255,0), 2)
+                cv2.circle(image_tmp, (x, y), 10, (0,0,255), -1)
+                cv2.circle(image_tmp, (x, y), 5, (0,255,0), -1)
                 plt.text(x,y,str(k)) #TODO, plt coordinates
         self.image_vis_corner = image_tmp
   
-    
-        
 
     def set_prefix(self,s):
         self.prefix = s
@@ -326,7 +317,6 @@ class Labeler:
     def collect_dots(self,show_flag=False):
         # print('drawing mesh and collected dots')
         image_tmp = self.image_vis_corner.copy() # layer 2 with grids 
-    
         
         if self._corner_points is None or self._corner_points.shape[0]!=4 or self.stop_collect:
             return self.image_vis_corner
@@ -334,12 +324,11 @@ class Labeler:
         self.dot_collector = []
         # find transformed grids
         grid_t, _,grid_faces,coords = self.find_M()
-        # img_tmp = self.image_vis.copy()
-        
+
         # show mesh faces
         for face in grid_faces:
             points = grid_t[face].astype('int')
-            cv2.line(image_tmp, tuple(points[0]), tuple(points[1]), (0,0,255), 1)
+            cv2.line(image_tmp, tuple(points[0]), tuple(points[1]), (0,0,255), 3)
 
         for k,pt in enumerate(grid_t):
             x,y = int(pt[0]),int(pt[1])
@@ -359,17 +348,14 @@ class Labeler:
                 cv2.circle(image_tmp, (int(picked_dot[0]),int(picked_dot[1])), 5, (0,255,255), -1)   
         
         for k, (label,dot) in enumerate(self.dot_collector):
-            # if k%chunk_i == 0:
             x,y = int(dot[0]),int(dot[1])
             cv2.circle(image_tmp, (x,y), 5, (0,255,255), -1)   
             cv2.putText(image_tmp, label, (x+10, y+10), cv2.FONT_HERSHEY_SIMPLEX, 
                             1, (255, 0, 0), 1, cv2.LINE_AA)   
 
-       
         if show_flag:
             show(image_tmp)
         self.image_vis_collect = image_tmp
-   
         return self.image_vis_collect
     
     def update_dot_prefix(self):
@@ -379,20 +365,6 @@ class Labeler:
             label_new = self.prefix + '_'+ c
             dot_collector.append([label_new,dot])
         self.dot_collector = dot_collector
-
-    # def show_collect_dots(self,show_flag=True,outside_features=None):
-    #     if len(self.dot_collector) == 0:
-    #         return self._image_vis_collect
-    #     for k, (label,dot) in enumerate(self.dot_collector):
-    #         # if k%chunk_i == 0:
-    #         x,y = int(dot[0]),int(dot[1])
-    #         cv2.circle(self._image_vis_collect, (x,y), 5, (0,255,255), -1)   
-    #         cv2.putText(self._image_vis_collect, label, (x+10, y+10), cv2.FONT_HERSHEY_SIMPLEX, 
-    #                         1, (255, 0, 0), 1, cv2.LINE_AA)       
-    #     if show_flag:
-    #         show(self._image_vis_collect)
-    #     return self._image_vis_collect
-
 
 class Label_Window():
     def __init__(self,img_path):
@@ -474,10 +446,13 @@ class Label_Window():
 
         self.func_mapping = click_corners  
         ids = [ord('0'),ord('1'),ord('2'),ord('3')]
-        operator = OPT_EXTEND
+        operator = OPT_X_NUM
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL) 
         while True:    
             key = cv2.waitKey(1) & 0xFF
+            if key == ord("q"):
+                cv2.destroyWindow(self.window_name)
+                return self.features_colloction
             if key == ord("x"):
                 operator = OPT_X_NUM
             elif key == ord("y"):
@@ -517,8 +492,7 @@ class Label_Window():
                     print(self.features_colloction.keys())
                     print('plz key in new name')
                     s = keyboard_input()
-                    print(s)
-                    if s == 'exit':
+                    if s == 'q':
                         break
                     self.labeler.set_prefix(s)
       
@@ -536,9 +510,6 @@ class Label_Window():
                             f.write(str(coord[0])+'\t'+str(coord[1]))
                             f.write('\n')
 
-            if key == ord("q"):
-                cv2.destroyWindow(self.window_name)
-                return self.features_colloction
 
             if key == ord('w'):
                 if operator == OPT_DOT_DETECT_THRESHOD:
@@ -554,14 +525,15 @@ class Label_Window():
                     
                 elif operator == OPT_CIRCLE_SIZE:
                     self.labeler.set_circle_r(self.labeler.circle_r+1)
-                     
-                elif operator == OPT_EXTEND: 
+
+                elif operator == OPT_EXTEND:
                     self.labeler.extend_grid()
-                    self.labeler.extend_y_num(i=-1)
+                    self.labeler.extend_x_num(i=-1)       
+              
                     
                 elif operator == OPT_CORNER:
                     self.labeler.decrease_corner_y(corner_i)
-                    # self.labeler.collect_dots()
+                    
                     x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
                     cv2.circle(self.image_vis, (x, y), 5,(255,0,255), 3)
                 
@@ -569,11 +541,10 @@ class Label_Window():
                     self.labeler.extend_grid()
                     self.labeler.grid_extend.increase_y_offset()
 
-                # self.labeler.collect_dots()    
+                    
 
             elif key == ord('s'):
                 if operator == OPT_DOT_DETECT_THRESHOD:
-                    # self.func_mapping = detect_dot_again
                     self.set_detect_dot_t(self.t-0.001)
                     self.detect_dots()                  
                     
@@ -588,27 +559,27 @@ class Label_Window():
                     
                 elif operator == OPT_EXTEND: 
                     self.labeler.extend_grid()
-                    self.labeler.extend_y_num(i=1)
+                    self.labeler.extend_x_num(i=1)
                                    
                 elif operator == OPT_CORNER:
                     self.labeler.increase_corner_y(corner_i)
-                    # self.labeler.collect_dots()
+                    
                     x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
                     cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
 
                 elif operator == OPT_MOVE:
                     self.labeler.extend_grid()
                     self.labeler.grid_extend.decrease_y_offset()
-                # self.labeler.collect_dots()
+                
 
             elif key == ord('a'):
-                if operator == OPT_EXTEND:
+                if operator == OPT_EXTEND: 
                     self.labeler.extend_grid()
-                    self.labeler.extend_x_num(i=-1)                 
+                    self.labeler.extend_y_num(i=-1)
 
                 elif operator == OPT_CORNER:
                     self.labeler.decrease_corner_x(corner_i)
-                    # self.labeler.collect_dots()
+                    
                     x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
                     cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
 
@@ -616,15 +587,14 @@ class Label_Window():
                     self.labeler.extend_grid()
                     self.labeler.grid_extend.increase_x_offset()
                     
-                # self.labeler.collect_dots()
             elif key == ord('d'):
                 if operator == OPT_EXTEND: 
                     self.labeler.extend_grid()
-                    self.labeler.extend_x_num(i=1)
-                    
+                    self.labeler.extend_y_num(i=1)
+
                 elif operator == OPT_CORNER:
                     self.labeler.increase_corner_x(corner_i)
-                    # self.labeler.collect_dots()   
+                       
                     x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
                     cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
 
@@ -632,11 +602,11 @@ class Label_Window():
                     self.labeler.extend_grid()
                     self.labeler.grid_extend.decrease_x_offset()    
             
-            self.image_vis = self.labeler.collect_dots()
-            
-            # if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
+            self.image_vis = self.labeler.collect_dots()            
             cv2.imshow(self.window_name, self.image_vis)
+            cv2.resizeWindow(self.window_name, 900, 900) 
             cv2.setMouseCallback(self.window_name, self.func_mapping, self)
+
 if __name__ == "__main__":
     img_path = 'chess_board.jpg'
     test = Label_Window(img_path)
