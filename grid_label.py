@@ -9,6 +9,7 @@ from pprint import pprint
 X_INIT_NUM = 10
 Y_INIT_NUM = 10
 OPT_EXTEND = 'extend grid'
+OPT_MOVE = 'move grid'
 OPT_X_NUM = 'grid x num'
 OPT_Y_NUM = 'grid y num'
 OPT_CIRCLE_SIZE= 'circle size'
@@ -347,7 +348,7 @@ class Labeler:
             x,y = int(dot[0]),int(dot[1])
             cv2.circle(self.image_vis_collect, (x,y), 5, (0,255,255), -1)   
             cv2.putText(self.image_vis_collect, label, (x+10, y+10), cv2.FONT_HERSHEY_SIMPLEX, 
-                            0.2, (255, 0, 0), 1, cv2.LINE_AA)       
+                            1, (255, 0, 0), 1, cv2.LINE_AA)       
 
         if show_flag:
             show(self.image_vis_collect)
@@ -374,7 +375,7 @@ class Label_Window():
         print('detecting dots')
         self.source_dots,image_dots  = detect_corners(self.image_raw,self.t)
         # show img with grids
-        self.image_dots  = show(image_dots,self.source_dots,msize=2,show=False,color=(255,0,0)) # layer 0 with dots
+        self.image_dots  = show(image_dots,self.source_dots,msize=5,show=False,color=(0,255,255)) # layer 0 with dots
         # self.image_vis_0  = self.image_vis_0[:,:,[2,1,0]].copy()
         self.labeler.image_dots =  self.image_dots.copy()
         self.labeler.source_dots = self.source_dots
@@ -476,201 +477,27 @@ class Label_Window():
             elif key in ids:
                 corner_i = ids.index(last_key)
                 operator = OPT_CORNER
-           
-           
-            if key == ord('w'):
-                if operator == OPT_DOT_DETECT_THRESHOD:
-                    # self.func_mapping = detect_dot_again
-                    self.set_detect_dot_t(self.t+0.001)
-                    self.detect_dots()
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_X_NUM:
-                    self.labeler.grid_inside.increase_x_num()
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_Y_NUM:
-                    self.labeler.grid_inside.increase_y_num()
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_CIRCLE_SIZE:
-                    self.labeler.set_circle_r(self.labeler.circle_r+1)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_EXTEND: 
-                    self.labeler.extend_grid()
-                    self.labeler.extend_y_num(i=-1)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_CORNER:
-                    self.labeler.decrease_corner_y(corner_i)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                    x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
-                    cv2.circle(self.image_vis, (x, y), 5,(255,0,255), 3)
-                    
 
-            elif key == ord('s'):
-                if operator == OPT_DOT_DETECT_THRESHOD:
-                    # self.func_mapping = detect_dot_again
-                    self.set_detect_dot_t(self.t-0.001)
-                    self.detect_dots()
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_X_NUM:    
-                    self.labeler.grid_inside.decrease_x_num()
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_Y_NUM:
-                    self.labeler.grid_inside.decrease_y_num()
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_CIRCLE_SIZE:
-                    self.labeler.set_circle_r(self.labeler.circle_r-1)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                elif operator == OPT_EXTEND: 
-                    self.labeler.extend_grid()
-                    self.labeler.extend_y_num(i=1)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction) 
-                elif operator == OPT_CORNER:
-                    self.labeler.increase_corner_y(corner_i)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                    x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
-                    cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
-            
-
-            # extend grid
-            elif key == ord('a'):
-                if operator == OPT_EXTEND:
-                    self.labeler.extend_grid()
-                    self.labeler.extend_x_num(i=-1)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-   
-                elif operator == OPT_CORNER:
-                    self.labeler.decrease_corner_x(corner_i)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                    x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
-                    cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
-            
-            elif key == ord('d'):
-                if operator == OPT_EXTEND: 
-                    self.labeler.extend_grid()
-                    self.labeler.extend_x_num(i=1)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-    
-                elif operator == OPT_CORNER:
-                    self.labeler.increase_corner_x(corner_i)
-                    self.labeler.collect_dots()
-                    if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                    x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
-                    cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
-
-            elif key == ord('p'):
+            if key == ord('p'):
                 print(self.labeler.grid_inside)
                 print(self.t)
-    
-            # adjust corners points
-            # elif key == ord('s') and last_key in ids:
-            #     i = ids.index(last_key)
-            #     self.labeler.increase_corner_y(i)
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-            #     x,y = int(self.labeler.corner_points[i][0]),int(self.labeler.corner_points[i][1])
-            #     cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
-                
-            
-            # elif key == ord('w') and last_key in ids:
-            #     i = ids.index(last_key)
-            #     self.labeler.decrease_corner_y(i)
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-            #     x,y = int(self.labeler.corner_points[i][0]),int(self.labeler.corner_points[i][1])
-            #     cv2.circle(self.image_vis, (x, y), 5,(255,0,255), 3)
-                
-            
-            # elif key == ord('d') and last_key in ids:
-               
-            #     i = ids.index(last_key)
-            #     self.labeler.increase_corner_x(i)
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-            #     x,y = int(self.labeler.corner_points[i][0]),int(self.labeler.corner_points[i][1])
-            #     cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
-                
-            
-            # elif key == ord('a') and last_key in ids:
-               
-            #     i = ids.index(last_key)
-            #     self.labeler.decrease_corner_x(i)
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-            #     x,y = int(self.labeler.corner_points[i][0]),int(self.labeler.corner_points[i][1])
-            #     cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
-                
-
-            # #m extend grid
-            # elif key == ord('a') and last_key == ord('m'):
-            #     self.labeler.extend_grid()
-            #     self.labeler.grid_extend.increase_x_offset()
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-
-            # elif key == ord('d') and last_key == ord('m'):
-            #     self.labeler.extend_grid()
-            #     self.labeler.grid_extend.decrease_x_offset()
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-            
-            # elif key == ord('s') and last_key == ord('m'):
-            #     self.labeler.extend_grid()
-            #     self.labeler.grid_extend.decrease_y_offset()
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-            
-            # elif key == ord('w') and last_key == ord('m'):
-            #     self.labeler.extend_grid()
-            #     self.labeler.grid_extend.increase_y_offset()
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-
-            elif key == ord('n'):
+           
+            if key == ord('n'):
                 print('plz input prefix')
                 s = keyboard_input()
                 self.labeler.set_prefix(s)
-                # self.labeler.stop_collect = 0
-                # if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)    
                 self.labeler.stop_collect = 0
             
-
-            elif key == ord('r'):
+            if key == ord('r'):
                 self.image_corners = []
                 self.func_mapping = click_corners  
                 self.init_labeler()
                 self.reset_image_vis()
 
-            elif key == ord("\n") or key == ord("\r"): # Enter Key:
-                self.func_mapping = wait_state
-                update_last_key = 1
-                last_key = 255
-                if self.labeler.prefix != '':
-                    self.features_colloction.update({self.labeler.prefix:self.labeler.dot_collector})
-                    print(self.features_colloction.keys())
-
-            elif key == ord('i'):
+            if key == ord('i'):
                 key = cv2.waitKey(1)
                 while self.labeler.prefix in self.features_colloction or self.labeler.prefix == '':
                     self.labeler.stop_collect = 1
-                  
                     print(self.features_colloction.keys())
                     print('plz key in new name')
                     s = keyboard_input()
@@ -693,70 +520,154 @@ class Label_Window():
                             f.write(str(coord[0])+'\t'+str(coord[1]))
                             f.write('\n')
 
-            elif key == ord("q"):
+            if key == ord("q"):
                 cv2.destroyWindow(self.window_name)
                 return self.features_colloction
-            
+
+
+
+       
+            if key == ord('w'):
+                if operator == OPT_DOT_DETECT_THRESHOD:
+                    # self.func_mapping = detect_dot_again
+                    self.set_detect_dot_t(self.t+0.001)
+                    self.detect_dots()
+                    self.labeler.collect_dots()
+                    
+                elif operator == OPT_X_NUM:
+                    self.labeler.grid_inside.increase_x_num()
+                    self.labeler.collect_dots()
+                    
+                elif operator == OPT_Y_NUM:
+                    self.labeler.grid_inside.increase_y_num()
+                    self.labeler.collect_dots()
+                    
+                elif operator == OPT_CIRCLE_SIZE:
+                    self.labeler.set_circle_r(self.labeler.circle_r+1)
+                    self.labeler.collect_dots()
+                    
+                elif operator == OPT_EXTEND: 
+                    self.labeler.extend_grid()
+                    self.labeler.extend_y_num(i=-1)
+                    self.labeler.collect_dots()
+                
+                elif operator == OPT_CORNER:
+                    self.labeler.decrease_corner_y(corner_i)
+                    self.labeler.collect_dots()
+                    x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
+                    cv2.circle(self.image_vis, (x, y), 5,(255,0,255), 3)
+                
+                elif operator == OPT_MOVE:
+                    self.labeler.extend_grid()
+                    self.labeler.grid_extend.increase_y_offset()
+                    self.labeler.collect_dots()
+                    
+
+            elif key == ord('s'):
+                if operator == OPT_DOT_DETECT_THRESHOD:
+                    # self.func_mapping = detect_dot_again
+                    self.set_detect_dot_t(self.t-0.001)
+                    self.detect_dots()
+                    self.labeler.collect_dots()
+                    
+                elif operator == OPT_X_NUM:    
+                    self.labeler.grid_inside.decrease_x_num()
+                    self.labeler.collect_dots()
+                    
+                elif operator == OPT_Y_NUM:
+                    self.labeler.grid_inside.decrease_y_num()
+                    self.labeler.collect_dots()
+                    
+                elif operator == OPT_CIRCLE_SIZE:
+                    self.labeler.set_circle_r(self.labeler.circle_r-1)
+                    self.labeler.collect_dots()
+                    
+                elif operator == OPT_EXTEND: 
+                    self.labeler.extend_grid()
+                    self.labeler.extend_y_num(i=1)
+                    self.labeler.collect_dots()
+                     
+                elif operator == OPT_CORNER:
+                    self.labeler.increase_corner_y(corner_i)
+                    self.labeler.collect_dots()
+                    x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
+                    cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
+
+                elif operator == OPT_MOVE:
+                    self.labeler.extend_grid()
+                    self.labeler.grid_extend.decrease_y_offset()
+                    self.labeler.collect_dots()
+
+            elif key == ord('a'):
+                if operator == OPT_EXTEND:
+                    self.labeler.extend_grid()
+                    self.labeler.extend_x_num(i=-1)
+                    self.labeler.collect_dots()
+
+                elif operator == OPT_CORNER:
+                    self.labeler.decrease_corner_x(corner_i)
+                    self.labeler.collect_dots()
+                    x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
+                    cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
+
+                elif operator == OPT_MOVE:
+                    self.labeler.extend_grid()
+                    self.labeler.grid_extend.increase_x_offset()
+                    self.labeler.collect_dots()
+
+            elif key == ord('d'):
+                if operator == OPT_EXTEND: 
+                    self.labeler.extend_grid()
+                    self.labeler.extend_x_num(i=1)
+                    self.labeler.collect_dots()
+
+                elif operator == OPT_CORNER:
+                    self.labeler.increase_corner_x(corner_i)
+                    self.labeler.collect_dots()   
+                    x,y = int(self.labeler.corner_points[corner_i][0]),int(self.labeler.corner_points[corner_i][1])
+                    cv2.circle(self.image_vis, (x, y), 5, (255,0,255), 3)
+
+                elif operator == OPT_MOVE:
+                    self.labeler.extend_grid()
+                    self.labeler.grid_extend.decrease_x_offset()
+                    self.labeler.collect_dots()
+
+            if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
+
             cv2.setMouseCallback(self.window_name, self.func_mapping, self)
 
-
-            # # adjust inside grid 
-            # elif key == ord('w') and last_key == ord('x'):
-                
-            #     self.labeler.grid_inside.increase_x_num()
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-            
-            # elif key == ord('s') and last_key == ord('x'):
-              
-            #     self.labeler.grid_inside.decrease_x_num()
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-
-            # elif key == ord('w') and last_key == ord('y'):
-            #     self.labeler.grid_inside.increase_y_num()
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-            
-            # elif key == ord('s') and last_key == ord('y'):
-                # self.labeler.grid_inside.decrease_y_num()
-                # self.labeler.collect_dots()
-                # if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-            
-            # adjust circle size 
-            # elif key == ord('w') and last_key == ord('c'):
-            #     self.labeler.set_circle_r(self.labeler.circle_r+1)
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-
-            # elif key == ord('s') and last_key == ord('c'):
-            #     self.labeler.set_circle_r(self.labeler.circle_r-1)
-            #     self.labeler.collect_dots()
-            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-                        
-            # elif key == ord('w') and last_key == ord('e'):
+            # #m extend grid
+            # elif key == ord('a') and last_key == ord('m'):
             #     self.labeler.extend_grid()
-            #     self.labeler.extend_y_num(i=1)
+            #     self.labeler.grid_extend.increase_x_offset()
             #     self.labeler.collect_dots()
             #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-            
-            # elif key == ord('s') and last_key == ord('e'):
+            #     update_last_key = 0
+
+            # elif key == ord('d') and last_key == ord('m'):
             #     self.labeler.extend_grid()
-            #     self.labeler.extend_y_num(i=-1)
+            #     self.labeler.grid_extend.decrease_x_offset()
             #     self.labeler.collect_dots()
             #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
-                
-    
+            #     update_last_key = 0
+            
+            # elif key == ord('s') and last_key == ord('m'):
+            #     self.labeler.extend_grid()
+            #     self.labeler.grid_extend.decrease_y_offset()
+            #     self.labeler.collect_dots()
+            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
+            #     update_last_key = 0
+            
+            # elif key == ord('w') and last_key == ord('m'):
+            #     self.labeler.extend_grid()
+            #     self.labeler.grid_extend.increase_y_offset()
+            #     self.labeler.collect_dots()
+            #     if not self.labeler.stop_collect: self.image_vis = self.labeler.show_collect_dots(show_flag=False)#,outside_features = self.features_colloction)
+            #     update_last_key = 0
+
 
 if __name__ == "__main__":
-    img_path = '/home/tingting/Downloads/background_sampled/sampled/bg_start/iPhone8Plus/000.png'
+    img_path = 'chess_board.jpg'
     test = Label_Window(img_path)
     test.main()
     print(test.features_colloction.keys())
