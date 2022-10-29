@@ -1,5 +1,5 @@
 # opencv_labelling_tool
-## grids labe
+## grids label
 STEP:
 1. click 4 corners to estabalish grid (by anti/clockwise)
 2. adjust grid row/column 
