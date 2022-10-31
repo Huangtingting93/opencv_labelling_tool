@@ -1,5 +1,7 @@
 # opencv_labelling_tool
 ## grids label
+This tool help label grids coordinates
+
 STEP:
 1. click 4 corners to estabalish grid (by anti/clockwise)
 2. adjust grid row/column 
@@ -15,6 +17,7 @@ x/y + w/s/a/d: adjust grids x/y number to map grid with the grid in image",
 e + w/s/a/d: extend grids",
 c + w/s increase/decrease circle size or dot detection threshold to collect dots",
 o + w/s increase/decrease corner detection threshold",
+m + w/s/a/d moving grid,
 i : save dots",
 p : print grid size and corners detection threhold",
 Press q: exist"
