@@ -408,6 +408,7 @@ class Label_Window():
         "e + w/s/a/d: extend grids",
         "c + w/s increase/decrease circle size or dot detection threshold to collect dots",
         "o + w/s increase/decrease corner detection threshold",
+        "m + w/s/a/d moving grid",
         "i : save dots",
         "p : print grid size and corners detection threhold",
         "Press q: exist"
